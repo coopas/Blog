@@ -1,6 +1,7 @@
 const express = require("express");
 const app = express(';');
 const bodyParser = require("body-parser");
+const session = require('express-session');
 const connection = require("./database/connection");
 
 const articlesController = require('./articles/ArticlesController');
@@ -9,13 +10,20 @@ const usersController = require('./users/UsersController');
 
 const Article = require('./articles/Article');
 const Category = require("./categories/Category");
-const User = require("./users/User");
+const adminAuth = require("./middlewares/adminAuth");
 
 app.set('view engine', 'ejs');
 
+app.use(session({
+    secret: "copas",
+    cookie: {maxAge: 86400000 },
+    resave: true,
+    saveUninitialized: true
+}))
+
 app.use(express.static('public'));
 
-app.use(bodyParser.urlencoded({ extend: false }));
+app.use(express.urlencoded({ extended: true }))
 app.use(bodyParser.json());
 
 connection.authenticate().then(() => {
@@ -38,10 +46,15 @@ app.get("/", (req, res) => {
         Category.findAll().then(categories => {
             res.render('index', {
                 articles: articles,
-                categories: categories
+                categories: categories,
+                req: req
             });
         })
     })
+})
+
+app.get("/admin", adminAuth, (req, res) => {
+    res.render("admin")
 })
 
 app.get("/:slug", (req, res) => {
@@ -55,7 +68,8 @@ app.get("/:slug", (req, res) => {
             Category.findAll().then(categories => {
                 res.render('article', {
                     article: article,
-                    categories: categories
+                    categories: categories,
+                    req: req
                 });
             })
         } else {
@@ -79,7 +93,8 @@ app.get("/category/:slug", (req, res) => {
             Category.findAll().then(categories => {
                 res.render('index', {
                     articles: category.articles,
-                    categories: categories
+                    categories: categories,
+                    req: req
                 });
             })
 

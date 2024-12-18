@@ -16,4 +16,19 @@
        <% }) %>
     </ul>
 
+    <ul class="navbar-nav ml-auto">
+        <% if(req.session.user == undefined) {%>
+            <li class="nav-item">
+                <a href="/login" class="nav-link">Login</a>
+            </li>
+        <% } else {%>
+            <li class="nav-item">
+                <a href="/logout" class="nav-link">Logout</a>
+            </li>
+            <li class="nav-item">
+                <a href="/admin" class="nav-link">Painel</a>
+            </li>
+        <% } %>
+    </ul>
+
 </nav>
